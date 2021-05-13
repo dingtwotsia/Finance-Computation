@@ -1,18 +1,11 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[653]:
-
+#Finance Computation
+#BY Black-Scholes、 Monte Carlo、CRR Model
 
 #import 所需的套件
 import math
 import numpy as np
 from scipy.stats import norm
 import random
-#答案儲存格
-
-
-# In[654]:
 
 
 #計算d1、d2
@@ -25,23 +18,20 @@ def Nd2(S,K,r,q,T,sigma):
     a = (math.log(S/K)+(r-q-(sigma**2)/2)*T)/(sigma*(T)**(1/2))
     return a
 
+#Apply Black-Scholes
 
-# In[655]:
-
-
-#Apply 布雷克休斯模型
+#European Call
 def black_scholes_Call(S,K,r,q,sigma,T):
     C =  S * math.exp(-q*T)*(norm.cdf(Nd1(S,K,r,q,T,sigma))) - K * math.exp(-r*T)*norm.cdf(Nd2(S,K,r,q,T,sigma))
     print("European Call : "+str(C))
+#EuroPean Put
 def black_scholes_Put(S,K,r,q,sigma,T):
     P =  K * math.exp(-r*T)*(norm.cdf(-Nd2(S,K,r,q,T,sigma)))- S * math.exp(-q*T)*norm.cdf(-Nd1(S,K,r,q,T,sigma))
     print("European Put : "+str(P))                                                                                        
 
+#Apply Monte_Carlo 
 
-# In[656]:
-
-
-#Monte_Carl Call
+#European Call
 def Monte_Carlo_Call(S,K,r,q,sigma,T,N,M):
     meanList = []
     allMean = 0
@@ -72,11 +62,7 @@ def Monte_Carlo_Call(S,K,r,q,sigma,T,N,M):
     print("Var : "+str(allVar))
     print("95%信賴區間 : "+str(allMean-2*allVar)+"~"+str(allMean+2*allVar))
 
-
-# In[657]:
-
-
-#Monte_Carl Put
+#EuroPean Put
 def Monte_Carlo_Put(S,K,r,q,sigma,T,N,M):
     meanList = []
     allMean = 0
@@ -107,10 +93,6 @@ def Monte_Carlo_Put(S,K,r,q,sigma,T,N,M):
     print("Var : "+str(allVar))
     print("95%信賴區間 : "+str(allMean-2*allVar)+"~"+str(allMean+2*allVar))
 
-
-# In[658]:
-
-
 #算Call的價格
 def call(S,K):
     C = 0.0
@@ -120,10 +102,7 @@ def call(S,K):
         C = 0.0
     return C  
 
-
-# In[659]:
-
-
+#算Put的價格
 def Put(S,K):
     P = 0.0
     if(S < K):
@@ -132,10 +111,9 @@ def Put(S,K):
         P = 0.0
     return P
 
+#Apply CRR Model
 
-# In[671]:
-
-
+#EuroPean Call
 def CRR_ECall(S,K,r,q,sigma,T,N,M):
     dT = T/(M) 
     u = math.exp(sigma*((dT)**(1/2))) 
@@ -151,10 +129,7 @@ def CRR_ECall(S,K,r,q,sigma,T,N,M):
             priceMatrix [j] = math.exp(-r*dT)*(P*priceMatrix[j]+(1-P)*priceMatrix[j+1])
     print("Eurpean Call : "+str(priceMatrix[0]))
 
-
-# In[672]:
-
-
+#EuroPean Put
 def CRR_EPut(S,K,r,q,sigma,T,N,M):
     dT = T/(M) 
     u = math.exp(sigma*((dT)**(1/2))) 
@@ -170,9 +145,7 @@ def CRR_EPut(S,K,r,q,sigma,T,N,M):
     print("European Put : "+str(priceMatrix[0]))
 
 
-# In[673]:
-
-
+#American Call
 def CRR_ACall(S,K,r,q,sigma,T,N,M):
     dT = T/(M) 
     u = math.exp(sigma*((dT)**(1/2))) 
@@ -194,9 +167,7 @@ def CRR_ACall(S,K,r,q,sigma,T,N,M):
     print("Amreican Call : "+str(priceMatrix[0]))
 
 
-# In[674]:
-
-
+#American Put
 def CRR_APut(S,K,r,q,sigma,T,N,M):
     dT = T/(M) 
     u = math.exp(sigma*((dT)**(1/2))) 
@@ -216,10 +187,7 @@ def CRR_APut(S,K,r,q,sigma,T,N,M):
                 priceMatrix [j] = priceBefore
     print("American Put : "+str(priceMatrix[0]))
 
-
-# In[676]:
-
-
+#Print Ans
 def OptionPrice(S,K,r,q,sigma,T,N,M):
     print("By black-Scholes")
     black_scholes_Call(S,K,r,q,sigma,T)
@@ -234,10 +202,7 @@ def OptionPrice(S,K,r,q,sigma,T,N,M):
     CRR_APut(S,K,r,q,sigma,T,N,M)
 
 
-# In[678]:
-
-
-#參數們
+#Some parameter(You can change)
 S = 50
 K = 50
 r = 0.1
@@ -246,10 +211,9 @@ T = 0.5
 sigma = 0.4
 N = 20
 M = 500
+
 OptionPrice(S,K,r,q,sigma,T,N,M)
 
-
-# In[ ]:
 
 
 
