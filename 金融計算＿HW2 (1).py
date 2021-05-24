@@ -18,8 +18,8 @@ def Nd2(S,K,r,q,T,sigma):
     a = (math.log(S/K)+(r-q-(sigma**2)/2)*T)/(sigma*(T)**(1/2))
     return a
 
-#Apply Black-Scholes
 
+#Apply Black-Scholes
 #European Call
 def black_scholes_Call(S,K,r,q,sigma,T):
     C =  S * math.exp(-q*T)*(norm.cdf(Nd1(S,K,r,q,T,sigma))) - K * math.exp(-r*T)*norm.cdf(Nd2(S,K,r,q,T,sigma))
@@ -29,8 +29,8 @@ def black_scholes_Put(S,K,r,q,sigma,T):
     P =  K * math.exp(-r*T)*(norm.cdf(-Nd2(S,K,r,q,T,sigma)))- S * math.exp(-q*T)*norm.cdf(-Nd1(S,K,r,q,T,sigma))
     print("European Put : "+str(P))                                                                                        
 
+    
 #Apply Monte_Carlo 
-
 #European Call
 def Monte_Carlo_Call(S,K,r,q,sigma,T,N,M):
     meanList = []
@@ -62,6 +62,7 @@ def Monte_Carlo_Call(S,K,r,q,sigma,T,N,M):
     print("Var : "+str(allVar))
     print("95%信賴區間 : "+str(allMean-2*allVar)+"~"+str(allMean+2*allVar))
 
+    
 #EuroPean Put
 def Monte_Carlo_Put(S,K,r,q,sigma,T,N,M):
     meanList = []
@@ -93,6 +94,7 @@ def Monte_Carlo_Put(S,K,r,q,sigma,T,N,M):
     print("Var : "+str(allVar))
     print("95%信賴區間 : "+str(allMean-2*allVar)+"~"+str(allMean+2*allVar))
 
+    
 #算Call的價格
 def call(S,K):
     C = 0.0
@@ -101,6 +103,7 @@ def call(S,K):
     else:
         C = 0.0
     return C  
+
 
 #算Put的價格
 def Put(S,K):
@@ -111,8 +114,8 @@ def Put(S,K):
         P = 0.0
     return P
 
-#Apply CRR Model
 
+#Apply CRR Model
 #EuroPean Call
 def CRR_ECall(S,K,r,q,sigma,T,N,M):
     dT = T/(M) 
@@ -129,6 +132,7 @@ def CRR_ECall(S,K,r,q,sigma,T,N,M):
             priceMatrix [j] = math.exp(-r*dT)*(P*priceMatrix[j]+(1-P)*priceMatrix[j+1])
     print("Eurpean Call : "+str(priceMatrix[0]))
 
+    
 #EuroPean Put
 def CRR_EPut(S,K,r,q,sigma,T,N,M):
     dT = T/(M) 
@@ -187,6 +191,7 @@ def CRR_APut(S,K,r,q,sigma,T,N,M):
                 priceMatrix [j] = priceBefore
     print("American Put : "+str(priceMatrix[0]))
 
+
 #Print Ans
 def OptionPrice(S,K,r,q,sigma,T,N,M):
     print("By black-Scholes")
@@ -213,8 +218,5 @@ N = 20
 M = 500
 
 OptionPrice(S,K,r,q,sigma,T,N,M)
-
-
-
 
 
