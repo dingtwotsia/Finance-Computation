@@ -10,8 +10,8 @@
 
 （2）數學方法定價：
 
-  (1)Cholesky Decomposition
+   (1)Cholesky Decomposition
   
-  (2)Cholesky Decomposition + Variate approach + Moment matching
+   (2)Cholesky Decomposition + Variate approach + Moment matching
   
-  (3)Cholesky Decomposition + Variate approach + Moment matching + Inverse Cholesky
+   (3)Cholesky Decomposition + Variate approach + Moment matching + Inverse Cholesky
