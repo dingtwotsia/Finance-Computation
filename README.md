@@ -8,7 +8,7 @@
   
   （3）CRR Model
 
-2. 法定價：
+2. 數學方法定價：
 
   （1）Choesky Decomposition
   
