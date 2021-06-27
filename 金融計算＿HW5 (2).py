@@ -1,0 +1,363 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[90]:
+
+
+#import 所需的套件
+import math
+import numpy as np
+from scipy.stats import norm
+import random
+
+
+# In[102]:
+
+
+#Binary Search 
+def Binary_search(value,List,n,N,aList):
+    #停止要件
+    if N - n <= 1 :
+        aList[0] = n
+        return n
+    #往後找
+    elif value > List[int((N+n)/2)]:
+        Binary_search(value,List,0,int((N+n)/2),aList)
+    #往前找
+    elif value < List[int(N/2)]:
+        Binary_search(value,List,n+int((N-n)/2),N,aList)
+    #剛好一樣
+    else:
+        aList[0] = n
+        return value    
+
+
+# In[103]:
+
+
+#Linear Search
+def Linear_search(value,List,n,N,aList):
+    begin = List[0]
+    end = List[N-1]
+    ans = 0
+    #如果全部都一樣
+    if begin - end  < 0.00000000000001:
+        ans = N-1
+    else:
+        ans = ((value-begin)/(end-begin))*(N-1)
+    ans = int(ans)
+    #細緻判斷
+    if ans >= N-1:
+        aList[0] = N
+    elif value < List[ans]:
+        aList[0] = int(ans)
+    elif (List[ans]<value)and(List[ans+1]>value):
+        aList[0] = int(ans+1)
+    else:
+        aList[0] = int(ans+2)
+
+
+# In[104]:
+
+
+#創造平均價格矩陣
+def AverageList(St,Save_t,u,d,m,x,y,t,T,n,List,distribution):
+    AMax = 0.0
+    AMin = 0.0
+    #計算 t 以前的期數
+    ratio = n*t/(T-t)
+    #極大值
+    Sum = 0.0
+    Sum += (ratio+1)*Save_t
+    Sum += St*u*(1-u**(x-y))/(1-u)+St*u**(x-y)*d*(1-d**y)/(1-d)
+    AMax = Sum/(x+1+ratio)
+    #極小值
+    Sum = 0.0
+    Sum += (ratio+1)*Save_t
+    Sum += St*d*(1-d**(y))/(1-d)+St*d**(y)*u*(1-u**(x-y))/(1-u)
+    AMin = Sum /(x+1+ratio)
+    #如果是用等量分佈
+    if distribution == "average":
+        for i in range(m+1):
+            List[i] = ((m-i)/m)*AMax + (i/m)*AMin
+    #如果是要用對數分佈
+    else:
+        for i in range(m+1):
+            if i == 0:
+                List[i] = AMax
+            elif i == m:
+                List[i] = AMin
+            else:
+                List[i] = math.exp(((m-i)/m)*math.log(AMax) + (i/m)*math.log(AMin))            
+
+
+# In[105]:
+
+
+#尋找前列
+def FindOption(value,x,y,U_MaxList,D_MaxList,UOptionList,DOptionList,n,m,t,T,u,d,St,r,p,method):
+    #計算 t 前期數
+    ratio = n*t/(T-t)
+    #計算Au、Ad
+    Au = ((ratio+x+1)*value + St*(u**(x-y+1)*(d**y)))/(ratio+x+2)
+    Ad = ((ratio+x+1)*value + St*(u**(x-y)*(d**(y+1))))/(ratio+x+2)
+    Cu = 0.0
+    Cd = 0.0
+    #特殊狀況排除
+    if U_MaxList[0] == U_MaxList[m]:
+        Cu = UOptionList[0]
+    elif Au <= U_MaxList[m]:
+        Cu = UOptionList[m]
+    else:
+        if Au >= U_MaxList[0]:
+            Cu = UOptionList[0]
+        #法一
+        elif method == "seq":
+            
+            for i in range(1,m+1):
+                if (Au > U_MaxList[i])and(Au < U_MaxList[i-1]):
+                    #print("一 "+str(i))
+                    Wu = (U_MaxList[i-1]-Au)/(U_MaxList[i-1]-U_MaxList[i])
+                    #print("Wu"+str(U_MaxList[i-1])+" - "+str(Au)+" - "+str(U_MaxList[i]))
+                    Cu = Wu * UOptionList[i] + (1-Wu) * UOptionList[i-1]
+                    #print("4")
+                    break
+        #法二
+        else:    
+            alist = [0]
+            if method == "bin":
+                #(2)
+                Binary_search(Au,U_MaxList,0,m+1,alist)
+       #法三     
+            else:
+                #(3)
+                Linear_search(Au,U_MaxList,0,m+1,alist)
+            i = alist[0]+1
+            #意外排除
+            if i >= m+1:
+                i = m
+            Wu = (U_MaxList[i-1]-Au)/(U_MaxList[i-1]-U_MaxList[i])
+            Cu = Wu * UOptionList[i] + (1-Wu) * UOptionList[i-1]
+    if D_MaxList[0] == D_MaxList[m]:
+        Cd = DOptionList[0]
+    elif Ad <= D_MaxList[m]:
+        Cd = UOptionList[m]
+    else:
+        if Ad >=  D_MaxList[0]:
+            Cd =  DOptionList[0]
+        elif method == "seq":
+            #(1)
+            for i in range(1,m+1):
+                if (Ad > D_MaxList[i])and(Ad < D_MaxList[i-1]):
+                    wd = 0.0
+                    Wd = (D_MaxList[i-1]-Ad)/(D_MaxList[i-1]-D_MaxList[i])
+                    Cd = Wd * DOptionList[i] + (1-Wd) * DOptionList[i-1]
+                    break
+        else:
+            alist = [0]
+            if method == "bin":
+                Binary_search(Ad,D_MaxList,0,m+1,alist)
+            else:
+                Linear_search(Ad,D_MaxList,0,m+1,alist)
+            
+            i = alist[0]+1
+            
+            if i >= m+1:
+                i = m
+            wd = 0.0
+            Wd = (D_MaxList[i-1]-Ad)/(D_MaxList[i-1]-D_MaxList[i])
+            Cd = Wd * DOptionList[i] + (1-Wd) * DOptionList[i-1]
+    Value = (p*Cu+(1-p)*Cd)*math.exp(-r*(T-t)/n)
+    return Value      
+
+
+# In[106]:
+
+
+def OptionValue(Ave,K):
+    if Ave > K:
+        return Ave - K
+    else:
+        return 0 
+
+
+# In[107]:
+
+
+def AverageOption(St,K,r,q,sigma,Save_t,t,T,n,m,method,distribution):
+    #計算參數
+    dT = (T-t)/n
+    u = math.exp(sigma*((dT)**(1/2))) 
+    d = 1.0/u 
+    P = ((math.exp((r-q)*(dT)))-d)/(u-d)
+    #建立股價、選擇權矩陣
+    priceMatrix = np.zeros((n+1,n+1,m+1))
+    EuoptionMatrix = np.zeros((n+1,n+1,m+1))
+    AmoptionMatrix = np.zeros((n+1,n+1,m+1))
+    #完成價格矩陣
+    for i in range(n+1):
+        for j in range(i+1):
+            AverageList(St,Save_t,u,d,m,i,j,t,T,n,priceMatrix[i][j],distribution)
+    #計算最後一期的損益
+    for i in range(n+1):
+        for j in range(m+1):
+            EuoptionMatrix[n][i][j] = OptionValue(priceMatrix[n][i][j],K)
+            AmoptionMatrix[n][i][j] = OptionValue(priceMatrix[n][i][j],K)
+    #回推價格
+    for i in range(n-1,-1,-1):
+        for j in range(i+1):
+            for k in range(m+1):
+                EuoptionMatrix[i][j][k] = FindOption(priceMatrix[i][j][k],i,j,priceMatrix[i+1][j],priceMatrix[i+1][j+1],EuoptionMatrix[i+1][j],EuoptionMatrix[i+1][j+1],n,m,t,T,u,d,St,r,P,method)
+                AmoptionMatrix[i][j][k] = FindOption(priceMatrix[i][j][k],i,j,priceMatrix[i+1][j],priceMatrix[i+1][j+1],AmoptionMatrix[i+1][j],AmoptionMatrix[i+1][j+1],n,m,t,T,u,d,St,r,P,method)
+                #如是美式選擇權
+                if (priceMatrix[i][j][k] - K) > AmoptionMatrix[i][j][k]:
+                    AmoptionMatrix[i][j][k] = priceMatrix[i][j][k] - K
+    #匯出答案
+    if distribution == "exp":
+        print("logarithmical")
+    elif method == "seq":
+        print("normal")
+    elif method == "bin":
+        print("bonus2 - binary search")
+    elif method == "lin":
+        print("bonus2 - linear interpolation")
+    elif distribution == "exp":
+        print("logarithmical")
+    print("歐式 ："+str(EuoptionMatrix[0][0][0]))
+    print("美式 ："+str(AmoptionMatrix[0][0][0]))               
+
+
+# In[108]:
+
+
+#計算平均數
+def Mean(num,N):
+    total = 0.0
+    for i in range(N):
+        total += num[i]
+    mean = total/N
+    return mean
+
+
+# In[109]:
+
+
+#計算Sigma
+def Var(num,N):
+    total = 0.0
+    mean = Mean(num,N)
+    for i in range(N):
+        total += (num[i] - mean)**2
+    var = (total / N)**(1/2)
+    return var
+
+
+# In[116]:
+
+
+#實作蒙地卡羅法
+def Monte_Carlo(St,r,q,sigma,t,T,Save_t,n,simu,rep):
+    # rep次試驗的list
+    ratio = n*t/(T-t)
+    meanList = []
+    dT = (T-t)/n
+    plus = np.array([(r - q - (sigma**2)/2) * dT]*simu)
+    for i in range(rep):
+        thisNum = np.zeros((n+1,simu))
+        #都先取自然對數處理
+        for j in range(simu):
+            thisNum[0][j] = math.log(St)
+        #模擬股價的自然對數
+        for j in range(n):
+            x = np.random.normal((thisNum[j] + plus),((sigma) * dT**(1/2)))
+            #匯出至下一期
+            thisNum[j+1] = x
+        #轉正
+        thisNum = thisNum.T
+        thisNow = []#現在價格
+        thisAveList = []#現在平均價格
+        for j in range(simu):
+            thisAve = 0.0
+            for k in range(1,n+1):
+                thisAve += math.exp(thisNum[j][k])
+            thisAve = thisAve/(n)
+            thisAveList.append(thisAve)
+        #價格
+        thisAns = []
+        for j in range(simu):
+            ans = ((((1+ratio)*Save_t+thisAveList[j]*(n))/(ratio+n+1))-K)*math.exp(-(r)*(T-t))
+            if ans < 0 :
+                ans = 0
+            thisAns.append(ans)  
+        meanList.append(Mean(thisAns,simu))
+    
+    allmean = Mean(meanList,rep)
+    allVar = Var(meanList,rep)
+    print("蒙地卡羅法：")
+    print("Mean : "+str(allmean)+" Var : "+str(allVar))
+    print("95%信賴區間 ： "+str(allmean - 2 * allVar)+" ~ "+str(allmean + 2 * allVar))
+
+
+# In[117]:
+
+
+St = 50.0
+K = 50.0
+r = 0.1
+q = 0.05
+sigma = 0.8
+t = 0.25
+T = 0.5
+n = 100
+m = [50,100,150,200,250,300,350,400]
+Save_t = 50.0
+simu = 10000
+rep = 20
+
+
+# In[114]:
+
+
+print("答案區 ： ")
+AverageOption(St,K,r,q,sigma,Save_t,t,T,n,m[1],"seq","average")
+Monte_Carlo(St,r,q,sigma,t,T,Save_t,n,simu,rep)
+for i in m:
+    print("bonus 1 : m = "+str(i))
+    AverageOption(St,K,r,q,sigma,Save_t,t,T,n,i,"seq","exp")
+    AverageOption(St,K,r,q,sigma,Save_t,t,T,n,i,"seq","average")
+
+AverageOption(St,K,r,q,sigma,Save_t,t,T,n,m[1],"bin","average")
+AverageOption(St,K,r,q,sigma,Save_t,t,T,n,m[1],"lin","average")
+
+
+# In[ ]:
+
+
+St = 50.0
+K = 50.0
+r = 0.1
+q = 0.05
+sigma = 0.8
+t = 0.0
+T = 0.25
+n = 100
+m = [50,100,150,200,250,300,350,400]
+Save_t = 50.0
+simu = 10000
+rep = 20
+
+
+# In[ ]:
+
+
+print("答案區 ： ")
+AverageOption(St,K,r,q,sigma,Save_t,t,T,n,m[1],"seq","average")
+Monte_Carlo(St,r,q,sigma,t,T,Save_t,n,simu,rep)
+for i in m:
+    print("bonus 1 : m = "+str(i))
+    AverageOption(St,K,r,q,sigma,Save_t,t,T,n,i,"seq","exp")
+    AverageOption(St,K,r,q,sigma,Save_t,t,T,n,i,"seq","average")
+
+AverageOption(St,K,r,q,sigma,Save_t,t,T,n,m[1],"bin","average")
+AverageOption(St,K,r,q,sigma,Save_t,t,T,n,m[1],"lin","average")
+
