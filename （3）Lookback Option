@@ -1,17 +1,8 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[671]:
-
-
 #import 所需的套件
 import math
 import numpy as np
 from scipy.stats import norm
 import random
-
-
-# In[672]:
 
 
 #繼承方法
@@ -48,9 +39,6 @@ def inherit(numList1,numList2,St,myList):
         num += 1    
 
 
-# In[673]:
-
-
 #寫入選擇價格
 def putprice(Smaxprice,Soption,St):
     #寫入的list
@@ -71,9 +59,6 @@ def putprice(Smaxprice,Soption,St):
     for i in newList:
         Soption[num] = i 
         num += 1
-
-
-# In[674]:
 
 
 #往後回推
@@ -110,9 +95,6 @@ def backprice(St,u,d,P,Myoption,MyMax,Soption1,SMax1,Soption2,SMax2,r,dT,typeof)
         num += 1       
 
 
-# In[675]:
-
-
 def bonus(St,u,d,P,n,SMax):
     AllList = []
     for i in range(n):
@@ -142,9 +124,6 @@ def bonus(St,u,d,P,n,SMax):
             iList.append(jList)
         AllList.append(iList)
     return AllList
-
-
-# In[676]:
 
 
 #計算CRR Binomial
@@ -229,9 +208,6 @@ def binomial(St,r,q,sigma,t,T,Smax,n):
     print("歐式的價格 ："+str(Soption[0][0][0])) 
 
 
-# In[677]:
-
-
 #計算平均數
 def Mean(num,N):
     total = 0.0
@@ -239,9 +215,6 @@ def Mean(num,N):
         total += num[i]
     mean = total/N
     return mean
-
-
-# In[678]:
 
 
 #計算Sigma
@@ -252,9 +225,6 @@ def Var(num,N):
         total += (num[i] - mean)**2
     var = (total / N)**(1/2)
     return var
-
-
-# In[679]:
 
 
 #實作蒙地卡羅法
@@ -272,7 +242,6 @@ def Monte_Carlo(St,r,q,sigma,t,T,Smax,n,simu,rep):
         #模擬股價的自然對數
         for j in range(n):
             x = np.random.normal((thisNum[j] + plus),((sigma**2) * dT)**(1/2))
-            
             #匯出至下一期
             thisNum[j+1] = x
         #轉正
@@ -297,10 +266,6 @@ def Monte_Carlo(St,r,q,sigma,t,T,Smax,n,simu,rep):
     print("Mean : "+str(allmean)+" Var : "+str(allVar))
     print("95%信賴區間 ： "+str(allmean - 2 * allVar)+" ~ "+str(allmean + 2 * allVar))
     
-
-
-# In[709]:
-
 
 def CheukMethod(St,r,q,sigma,t,T,Smax,n):
     #計算u,d,P
@@ -341,9 +306,6 @@ def CheukMethod(St,r,q,sigma,t,T,Smax,n):
     print(Soption[0][0]*St)            
 
 
-# In[692]:
-
-
 #輸入參數
 St = 50
 r = 0.1
@@ -357,23 +319,11 @@ simu = 10000
 rep = 20
 
 
-# In[695]:
-
-
 for i in Smax:
     print("Smax,t = "+str(i))
     binomial(St,r,q,sigma,t,T,i,n)
     Monte_Carlo(St,r,q,sigma,t,T,i,n,simu,rep)
-
-
-# In[711]:
-
+    
 
 CheukMethod(St,r,q,sigma,0.2,0.45,St,1000)
-
-
-# In[ ]:
-
-
-
 
